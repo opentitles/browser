@@ -11,4 +11,5 @@ export const {
   MONGO_URL,
   MONGO_DB_PROD,
   MONGO_DB_TEST,
+  USER_AGENT
 } = process.env;

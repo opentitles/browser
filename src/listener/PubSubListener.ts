@@ -1,18 +1,14 @@
 import amqp from 'amqplib/callback_api';
 import { Clog, LOGLEVEL } from '@fdebijl/clog';
-import * as Sentry from '@sentry/node';
 
-import { CONFIG } from '../config';
-import { notifyTitleChanged } from '../hooks/notifyTitleChanged';
-import { connect } from '../db/connect';
-import { initializeTwit } from '../twitter/initializeTwit';
+import * as CONFIG from '../config';
 import { Listener } from './Listener';
 
 export class PubSubListener implements Listener {
   private clog: Clog;
 
   constructor() {
-    this.clog = new Clog(CONFIG.MIN_LOGLEVEL);
+    this.clog = new Clog();
   }
 
   private async connectToMQ(): Promise<amqp.Channel> {
@@ -43,58 +39,29 @@ export class PubSubListener implements Listener {
     });
   }
 
-  async init(callback: (article: Article, medium: MediumDefinition) => void): Promise<void> {
+  async init(callback: (article: Article, medium: MediumDefinition) => Promise<void>): Promise<void> {
     const channel: amqp.Channel = await this.connectToMQ();
 
-    const { db } = await connect(CONFIG.MONGO_URL);
-    const T = await initializeTwit();
-    const articleCollection = db.collection('articles');
+    const queue = 'opentitles_work'
 
-    const exchange = 'opentitles';
-    const key = 'nl.NOS'
-
-    channel.assertExchange(exchange, 'topic', {
+    channel.assertQueue(queue, {
       durable: true
-    }, (error2) => {
-      if (error2) {
-        this.clog.log(error2, LOGLEVEL.ERROR);
-        throw error2;
-      }
-
-      this.clog.log(`Successfully asserted exchange ${exchange}`, LOGLEVEL.DEBUG);
     });
 
-    channel.assertQueue('', {
-      exclusive: true
-    }, (error3, q) => {
-      if (error3) {
-        this.clog.log(error3, LOGLEVEL.ERROR);
-        throw error3;
-      }
+    channel.prefetch(1);
 
-      if (!channel) {
-        this.clog.log('Channel was undefined at runtime!', LOGLEVEL.FATAL);
+    this.clog.log(`Listening for jobs on queue '${queue}'`);
+    channel.consume(queue, (msg) => {
+      if (!msg) {
         return;
       }
 
-      this.clog.log(`NOSEdits is listening on exchange ${exchange} with key ${key}`, LOGLEVEL.INFO);
-
-      channel.bindQueue(q.queue, exchange, key);
-
-      channel.consume(q.queue, (msg) => {
-        if (!msg) {
-          return;
-        }
-
-        const payload = JSON.parse(msg.content.toString());
-        notifyTitleChanged(payload, T, articleCollection).then(() => {
-          // Ack here
-        }).catch((err) => {
-          Sentry.captureException(err);
-        })
-      }, {
-        noAck: true
+      const { article, medium } = JSON.parse(msg.content.toString());
+      callback(article, medium).then(() => {
+        channel.ack(msg);
       });
-    });
+    }, {
+      noAck: false
+    })
   }
 }
