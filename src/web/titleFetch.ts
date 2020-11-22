@@ -11,7 +11,7 @@ let page: puppeteer.Page;
 
 export const browserInit = async (): Promise<void> => {
   browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
     ignoreHTTPSErrors: true,
   });
   page = (await browser.pages())[0];
@@ -54,7 +54,7 @@ export const titleFetch = async (article: Article, medium: MediumDefinition): Pr
     clog.log(`Got title <<${title}>> on ${article.org}:${article.articleID}`, LOGLEVEL.DEBUG);
 
     // Wait for a while so we don't DOS the medium
-    const max = 4500, min = 2500;
+    const max = 3000, min = 1000;
     const wait =  Math.floor(Math.random() * (max - min + 1) + min);
     await page.waitForTimeout(wait);
 

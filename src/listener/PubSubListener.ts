@@ -1,4 +1,5 @@
 import amqp from 'amqplib/callback_api';
+import moment from 'moment';
 import { Clog, LOGLEVEL } from '@fdebijl/clog';
 
 import * as CONFIG from '../config';
@@ -6,6 +7,11 @@ import { Listener } from './Listener';
 
 export class PubSubListener implements Listener {
   private clog: Clog;
+  private connection: amqp.Connection | null = null;
+  private start: moment.Moment = moment();
+  private end: moment.Moment = moment();
+  private started = false;
+  private ended = false;
 
   constructor() {
     this.clog = new Clog();
@@ -44,6 +50,8 @@ export class PubSubListener implements Listener {
 
     const queue = 'opentitles_work'
 
+    this.start = moment();
+
     channel.assertQueue(queue, {
       durable: true
     });
@@ -56,12 +64,26 @@ export class PubSubListener implements Listener {
         return;
       }
 
+      this.started = true;
+
       const { article, medium } = JSON.parse(msg.content.toString());
       callback(article, medium).then(() => {
         channel.ack(msg);
       });
     }, {
       noAck: false
-    })
+    });
+
+    setInterval(() => {
+      channel.assertQueue(queue, {durable: true}, (err, ok) => {
+        if (ok.messageCount === 0) {
+          this.end = moment();
+          this.ended = false;
+          const minutes = this.end.diff(this.start, 'minutes');
+          const seconds = (this.end.diff(this.start, 'seconds')) % 60;
+          this.clog.log(`Queue is empty! Finished in ${minutes}m ${seconds}s`)
+        }
+      })
+    }, 10 * 1000)
   }
 }

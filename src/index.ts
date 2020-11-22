@@ -1,12 +1,12 @@
 import { connect } from "./db/connect";
 import { insertTitleToDB } from "./db/insertTitleToDB";
 import { PubSubListener } from "./listener/PubSubListener";
-import { PubSubNotifier } from "./notifiers";
+import { NullNotifier, PubSubNotifier } from "./notifiers";
 import { titleFetch, browserInit } from "./web/titleFetch";
 import * as CONFIG from './config';
 
 const init = async () => {
-  const notifier = new PubSubNotifier();
+  const notifier = new NullNotifier();
   const listener = new PubSubListener();
   const { db } = await connect(CONFIG.MONGO_URL);
 
