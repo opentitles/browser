@@ -1,9 +1,10 @@
 import puppeteer from 'puppeteer';
 import { Clog, LOGLEVEL } from '@fdebijl/clog';
 
+import * as CONFIG from '../config';
 import { cookieClicker } from './cookieClicker';
 import { findTitleElement } from './findTitleElement';
-import * as CONFIG from '../config';
+import { Webconfig } from './WebConfig';
 
 const clog = new Clog();
 let browser: puppeteer.Browser;
@@ -15,7 +16,6 @@ export const browserInit = async (): Promise<void> => {
     ignoreHTTPSErrors: true,
   });
   page = (await browser.pages())[0];
-  await page.setUserAgent(CONFIG.USER_AGENT || 'GoogleBot');
   clog.log('Initiated browser', LOGLEVEL.DEBUG);
   return;
 }
@@ -23,13 +23,21 @@ export const browserInit = async (): Promise<void> => {
 export const titleFetch = async (article: Article, medium: MediumDefinition): Promise<string | undefined> => {
   const link: string = article.link || article.guid;
 
+  const webconfig = new Webconfig(medium);
+  await page.setUserAgent(webconfig.userAgent);
+
   try {
     await page.goto(link, {
-      timeout: 5000
+      timeout: parseInt(CONFIG.DEFAULT_TIMEOUT as string)
     });
 
     // Bypass any cookiewalls
     await cookieClicker(page, medium);
+
+    if (webconfig.cooldown > 0) {
+      // Prevent accidental DoS and getting blocked
+      await page.waitForTimeout(webconfig.cooldown);
+    }
 
     // Verify title is present on page and matches that from the RSS feed
     const titleElement = await findTitleElement(medium, page);
@@ -46,17 +54,12 @@ export const titleFetch = async (article: Article, medium: MediumDefinition): Pr
     title = title.trim();
     title = title.replace(/\r?\n|\r/g, '');
 
-    // Sanity check
+    // Sanity check - empty titles are probably an error
     if (title.length < 3) {
       return;
     }
 
     clog.log(`Got title <<${title}>> on ${article.org}:${article.articleID}`, LOGLEVEL.DEBUG);
-
-    // Wait for a while so we don't DOS the medium
-    const max = 3000, min = 1000;
-    const wait =  Math.floor(Math.random() * (max - min + 1) + min);
-    await page.waitForTimeout(wait);
 
     return title;
   } catch (e) {

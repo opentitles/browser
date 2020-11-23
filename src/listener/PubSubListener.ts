@@ -76,9 +76,9 @@ export class PubSubListener implements Listener {
 
     setInterval(() => {
       channel.assertQueue(queue, {durable: true}, (err, ok) => {
-        if (ok.messageCount === 0) {
+        if (ok.messageCount === 0 && this.started && !this.ended) {
           this.end = moment();
-          this.ended = false;
+          this.ended = true;
           const minutes = this.end.diff(this.start, 'minutes');
           const seconds = (this.end.diff(this.start, 'seconds')) % 60;
           this.clog.log(`Queue is empty! Finished in ${minutes}m ${seconds}s`)
