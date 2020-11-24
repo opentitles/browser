@@ -27,20 +27,26 @@ export const titleFetch = async (article: Article, medium: MediumDefinition): Pr
   await page.setUserAgent(webconfig.userAgent);
 
   try {
-    await page.goto(link, {
-      timeout: parseInt(CONFIG.DEFAULT_TIMEOUT as string)
+    const start = Date.now();
+
+    page.goto(link, {
+      timeout: 0
     });
 
-    // Bypass any cookiewalls
-    await cookieClicker(page, medium);
+    const titleElement = await Promise.race(
+      medium.title_query.map(
+        selector => page.waitForSelector(selector, {
+          timeout: webconfig.timeout
+        })
+      )
+    );
 
-    if (webconfig.cooldown > 0) {
-      // Prevent accidental DoS and getting blocked
-      await page.waitForTimeout(webconfig.cooldown);
+    // Ensure we wait at least length of webconfig.cooldown before going to the next page
+    const end = Date.now();
+    if (end - start < webconfig.cooldown) {
+      await page.waitForTimeout(webconfig.cooldown - (end - start));
     }
 
-    // Verify title is present on page and matches that from the RSS feed
-    const titleElement = await findTitleElement(medium, page);
     if (!titleElement) {
       clog.log(`Could not find title element at ${link}`, LOGLEVEL.WARN);
       return;
