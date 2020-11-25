@@ -1,4 +1,3 @@
-import { time } from 'console';
 import * as CONFIG from '../config';
 
 export class Webconfig {
@@ -33,6 +32,13 @@ export class Webconfig {
         return {
           cooldown: 1000,
           timeout: 10000,
+          userAgent: CONFIG.REAL_USER_AGENT as string
+        }
+      }
+      case 'BNR': {
+        return {
+          cooldown: 2000,
+          timeout: 5000,
           userAgent: CONFIG.REAL_USER_AGENT as string
         }
       }

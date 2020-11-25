@@ -13,5 +13,4 @@ FROM base as prod
 RUN npm ci --only=production
 COPY --from=builder /usr/src/browser/dist .
 ENV NODE_ENV=production
-EXPOSE 8081 8081
 CMD ["npm", "start"]

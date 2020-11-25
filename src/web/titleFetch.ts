@@ -1,10 +1,7 @@
 import puppeteer from 'puppeteer';
 import { Clog, LOGLEVEL } from '@fdebijl/clog';
 
-import * as CONFIG from '../config';
-import { cookieClicker } from './cookieClicker';
-import { findTitleElement } from './findTitleElement';
-import { Webconfig } from './WebConfig';
+import { Webconfig } from './Webconfig';
 
 const clog = new Clog();
 let browser: puppeteer.Browser;
