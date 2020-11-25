@@ -9,7 +9,7 @@ let page: puppeteer.Page;
 
 export const browserInit = async (): Promise<void> => {
   browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     ignoreHTTPSErrors: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
