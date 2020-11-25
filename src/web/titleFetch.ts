@@ -11,6 +11,7 @@ export const browserInit = async (): Promise<void> => {
   browser = await puppeteer.launch({
     headless: false,
     ignoreHTTPSErrors: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
   page = (await browser.pages())[0];
   clog.log('Initiated browser', LOGLEVEL.DEBUG);
