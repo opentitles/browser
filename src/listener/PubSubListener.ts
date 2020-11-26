@@ -48,18 +48,20 @@ export class PubSubListener implements Listener {
   async init(callback: (article: Article, medium: MediumDefinition) => Promise<void>): Promise<void> {
     const channel: amqp.Channel = await this.connectToMQ();
 
-    const queue = 'opentitles_work'
+    const queueName = 'opentitles_work'
 
     this.start = moment();
 
-    channel.assertQueue(queue, {
+    channel.assertQueue(queueName, {
       durable: true
+    }, (err, queue) => {
+      if (!err) {
+        this.clog.log(`Started listening for jobs on queue '${queueName}'${queue ? `, current queue length is ${queue.messageCount} with ${queue.consumerCount} consumers` : ``}`);
+      }
     });
 
     channel.prefetch(1);
-
-    this.clog.log(`Listening for jobs on queue '${queue}'`);
-    channel.consume(queue, (msg) => {
+    channel.consume(queueName, (msg) => {
       if (!msg) {
         return;
       }
@@ -75,7 +77,7 @@ export class PubSubListener implements Listener {
     });
 
     setInterval(() => {
-      channel.assertQueue(queue, {durable: true}, (err, ok) => {
+      channel.assertQueue(queueName, {durable: true}, (err, ok) => {
         if (ok.messageCount === 0 && this.started && !this.ended) {
           this.end = moment();
           this.ended = true;
