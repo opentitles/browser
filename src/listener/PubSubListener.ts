@@ -1,5 +1,4 @@
 import amqp from 'amqplib/callback_api';
-import moment from 'moment';
 import { Clog, LOGLEVEL } from '@fdebijl/clog';
 
 import * as CONFIG from '../config';
@@ -18,8 +17,6 @@ export class PubSubListener implements Listener {
         throw new Error('RABBITMQ_URL was not defined in the environment variables, could not connect to message exchange.');
       }
 
-      this.clog.log(`Connecting to RabbitMQ at ${CONFIG.RABBITMQ_URL}`, LOGLEVEL.DEBUG);
-
       amqp.connect(CONFIG.RABBITMQ_URL, (error0, connection) => {
         if (error0) {
           this.clog.log(error0, LOGLEVEL.ERROR);
@@ -32,7 +29,7 @@ export class PubSubListener implements Listener {
             throw error1;
           }
 
-          this.clog.log(`Succesfully created channel`, LOGLEVEL.DEBUG);
+          this.clog.log(`Succesfully connected to RabbitMQ`, LOGLEVEL.DEBUG);
 
           resolve(channel);
         });

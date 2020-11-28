@@ -14,6 +14,7 @@ const init = async () => {
 
   listener.init(async (article, medium) => {
     const possibleNewTitle = await titleFetch(article, medium);
+
     if (possibleNewTitle) {
       await insertTitleToDB(article, possibleNewTitle, db, notifier)
     }

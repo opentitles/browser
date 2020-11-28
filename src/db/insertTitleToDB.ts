@@ -22,6 +22,7 @@ export const insertTitleToDB = (article: Article, possiblyNewTitle: string, dbo:
     if (res instanceof Error) {
       clog.log(`${res.name}: ${res.message}`, LOGLEVEL.ERROR);
       resolve();
+      return;
     }
 
     if (!(res instanceof Error)) {
@@ -38,6 +39,8 @@ export const insertTitleToDB = (article: Article, possiblyNewTitle: string, dbo:
           clog.log(`No new title for [${article.org}:${article.articleID}]`, LOGLEVEL.DEBUG);
           resolve();
         }
+      } else {
+        resolve();
       }
     }
   });
