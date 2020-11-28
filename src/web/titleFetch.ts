@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer-extra';
+import puppeteer from 'puppeteer';
 import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker';
 import { Clog, LOGLEVEL } from '@fdebijl/clog';
 
@@ -13,10 +13,10 @@ let success = 0;
 
 export const browserInit = async (): Promise<void> => {
   // use adblocker
-  puppeteer.use(AdblockerPlugin({
-    blockTrackers: true,
-    useCache: true
-  }));
+  // puppeteer.use(AdblockerPlugin({
+  //   blockTrackers: true,
+  //   useCache: true
+  // }));
 
   browser = await puppeteer.launch({
     headless: true,
