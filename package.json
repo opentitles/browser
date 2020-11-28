@@ -12,7 +12,8 @@
     "moment": "^2.29.1",
     "mongodb": "3.6.1",
     "puppeteer": "^5.5.0",
-    "puppeteer-extra": "^3.1.15"
+    "puppeteer-extra": "^3.1.15",
+    "puppeteer-extra-plugin-adblocker": "^2.11.9"
   },
   "devDependencies": {
     "@types/amqplib": "0.5.13",
