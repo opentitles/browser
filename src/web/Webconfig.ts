@@ -16,21 +16,21 @@ export class Webconfig {
     switch (mediumName) {
       case 'Tweakers': {
         return {
-          cooldown: 5000,
+          cooldown: 2000,
           timeout: parseInt(CONFIG.DEFAULT_TIMEOUT as string),
           userAgent: CONFIG.DEFAULT_USER_AGENT as string
         }
       }
       case 'Telegraaf': {
         return {
-          cooldown: 1000,
+          cooldown: 500,
           timeout: parseInt(CONFIG.DEFAULT_TIMEOUT as string),
           userAgent: CONFIG.REAL_USER_AGENT as string
         }
       }
       case 'Newsweek': {
         return {
-          cooldown: 1000,
+          cooldown: 500,
           timeout: 10000,
           userAgent: CONFIG.REAL_USER_AGENT as string
         }

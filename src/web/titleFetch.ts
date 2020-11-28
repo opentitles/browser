@@ -6,14 +6,28 @@ import { Webconfig } from './Webconfig';
 const clog = new Clog();
 let browser: puppeteer.Browser;
 let page: puppeteer.Page;
+let failures = 0;
+let success = 0;
 
 export const browserInit = async (): Promise<void> => {
   browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
     ignoreHTTPSErrors: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
   page = (await browser.pages())[0];
+
+  // Disable image/css loading
+  await page.setRequestInterception(true);
+
+  page.on('request', request => {
+    if (request.resourceType() === 'image' || request.resourceType() === 'stylesheet') {
+      request.abort();
+    } else {
+      request.continue();
+    }
+  });
+
   clog.log('Initiated browser', LOGLEVEL.DEBUG);
   return;
 }
@@ -46,7 +60,8 @@ export const titleFetch = async (article: Article, medium: MediumDefinition): Pr
     }
 
     if (!titleElement) {
-      clog.log(`Could not find title element at ${link}`, LOGLEVEL.WARN);
+      clog.log(`Could not find title element at ${link} using query '${medium.title_query}'`, LOGLEVEL.WARN);
+      failures++;
       return;
     }
 
@@ -58,16 +73,19 @@ export const titleFetch = async (article: Article, medium: MediumDefinition): Pr
     title = title.trim();
     title = title.replace(/\r?\n|\r/g, '');
 
-    // Sanity check - empty titles are probably an error
+    // Sanity check - empty or very short titles are probably an error
     if (title.length < 3) {
+      failures++;
       return;
     }
 
     clog.log(`Got title <<${title}>> on ${article.org}:${article.articleID}`, LOGLEVEL.DEBUG);
+    success++;
 
     return title;
   } catch (e) {
-    clog.log(`Could not fetch title at ${link}: ${e}`, LOGLEVEL.ERROR)
+    clog.log(`Could not fetch title at ${link}: ${e}. Failure rate is now ${Math.round(((failures / ((success + failures) / 100)) * 100) / 100)}%`, LOGLEVEL.ERROR)
+    failures++;
     return;
   }
 }
