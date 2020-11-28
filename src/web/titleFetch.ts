@@ -1,5 +1,4 @@
 import puppeteer from 'puppeteer';
-import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker';
 import { Clog, LOGLEVEL } from '@fdebijl/clog';
 
 import { Webconfig } from './Webconfig';
@@ -12,12 +11,6 @@ let failures = 0;
 let success = 0;
 
 export const browserInit = async (): Promise<void> => {
-  // use adblocker
-  // puppeteer.use(AdblockerPlugin({
-  //   blockTrackers: true,
-  //   useCache: true
-  // }));
-
   browser = await puppeteer.launch({
     headless: true,
     ignoreHTTPSErrors: true,
@@ -27,15 +20,20 @@ export const browserInit = async (): Promise<void> => {
   page = (await browser.pages())[0];
 
   // Disable image/css loading
-  // await page.setRequestInterception(true);
+  await page.setRequestInterception(true);
 
-  // page.on('request', request => {
-  //   if (request.resourceType() === 'image' || request.resourceType() === 'stylesheet') {
-  //     request.abort();
-  //   } else {
-  //     request.continue();
-  //   }
-  // });
+  page.on('request', request => {
+    if (
+      request.resourceType() === 'image' ||
+      request.resourceType() === 'stylesheet' ||
+      request.resourceType() === 'media' ||
+      request.resourceType() === 'font'
+    ) {
+      request.abort();
+    } else {
+      request.continue();
+    }
+  });
 
   clog.log('Initiated browser', LOGLEVEL.DEBUG);
   return;
