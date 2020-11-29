@@ -50,7 +50,7 @@ export class PubSubListener implements Listener {
       }
     });
 
-    channel.prefetch(1);
+    channel.prefetch(Number.parseInt((CONFIG.PREFETCH as string) ?? '2'));
     channel.consume(queueName, (msg) => {
       if (!msg) {
         return;
