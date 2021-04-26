@@ -16,16 +16,16 @@
     "puppeteer-extra-plugin-adblocker": "2.11.9"
   },
   "devDependencies": {
-    "@types/amqplib": "0.5.13",
+    "@types/amqplib": "0.5.17",
     "@types/moment": "2.13.0",
-    "@types/mongodb": "3.5.27",
-    "@types/node": "13.13.30",
-    "@types/puppeteer": "5.4.0",
-    "@typescript-eslint/eslint-plugin": "4.7.0",
-    "@typescript-eslint/parser": "4.7.0",
-    "eslint": "7.13.0",
-    "ts-node": "9.0.0",
-    "typescript": "4.0.5"
+    "@types/mongodb": "3.6.12",
+    "@types/node": "13.13.50",
+    "@types/puppeteer": "5.4.3",
+    "@typescript-eslint/eslint-plugin": "4.22.0",
+    "@typescript-eslint/parser": "4.22.0",
+    "eslint": "7.25.0",
+    "ts-node": "9.1.1",
+    "typescript": "4.2.4"
   },
   "name": "browser"
 }
