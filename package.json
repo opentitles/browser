@@ -6,7 +6,7 @@
     "lint": "eslint \"./src/**/*.ts\" --max-warnings 2"
   },
   "dependencies": {
-    "@fdebijl/clog": "1.85.0",
+    "@fdebijl/clog": "1.86.0",
     "amqplib": "0.7.1",
     "dotenv": "8.2.0",
     "moment": "2.29.1",
