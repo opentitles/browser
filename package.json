@@ -7,10 +7,10 @@
   },
   "dependencies": {
     "@fdebijl/clog": "1.88.0",
-    "amqplib": "0.7.1",
+    "amqplib": "0.8.0",
     "dotenv": "8.6.0",
     "moment": "2.29.1",
-    "mongodb": "3.6.6",
+    "mongodb": "3.6.8",
     "puppeteer": "5.5.0",
     "puppeteer-extra": "3.1.18",
     "puppeteer-extra-plugin-adblocker": "2.11.11"
