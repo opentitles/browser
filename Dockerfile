@@ -1,4 +1,4 @@
-FROM node:12 AS base
+FROM node:20 AS base
 WORKDIR /usr/src/browser
 COPY package*.json ./
 
